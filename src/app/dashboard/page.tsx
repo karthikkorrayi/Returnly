@@ -18,37 +18,37 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Your Items</h1>
+    <main className="min-h-screen px-4 py-8">
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <h1 className="font-display text-4xl font-semibold text-[var(--color-ink)]">Your Items</h1>
           <Link
             href="/dashboard/items/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
+            className="btn-primary px-5 py-3 text-sm"
           >
-            + Add Item
+            Add item tag
           </Link>
         </div>
 
         {!items || items.length === 0 ? (
-          <p className="text-gray-500">No items yet. Add your first one above.</p>
+          <div className="tag-card p-6"><p className="text-[var(--color-ink-muted)]">No items yet — add your first tag.</p></div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid gap-4">
             {items.map((item) => (
               <Link
                 key={item.id}
                 href={`/dashboard/items/${item.id}`}
-                className="block bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition"
+                className="tag-card block p-5 hover:-translate-y-0.5"
               >
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between gap-4 pr-8">
                   <div>
-                    <h2 className="font-semibold text-gray-800">{item.title}</h2>
-                    <p className="text-sm text-gray-500">{item.category}</p>
+                    <h2 className="font-display text-2xl font-semibold text-[var(--color-ink)]">{item.title}</h2>
+                    <p className="mt-1 text-sm text-[var(--color-ink-muted)]">{item.category}</p>
                   </div>
-                  {item.is_lost && (
-                    <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
-                      LOST
-                    </span>
+                  {item.is_lost ? (
+                    <span className="status-pill status-lost">! Lost</span>
+                  ) : (
+                    <span className="status-pill status-safe">✓ Safe</span>
                   )}
                 </div>
               </Link>

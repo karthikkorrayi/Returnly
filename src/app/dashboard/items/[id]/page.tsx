@@ -25,32 +25,33 @@ export default async function ItemDetailPage({
   const qrImageUrl = `/api/generate-qr?text=${encodeURIComponent(scanUrl)}`
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md space-y-4">
-        <h1 className="text-2xl font-bold text-gray-800">{item.title}</h1>
-        {item.category && <p className="text-gray-500">{item.category}</p>}
+    <div className="min-h-screen px-4 py-8">
+      <div className="tag-card mx-auto max-w-md space-y-5 p-6">
+        <h1 className="font-display pr-10 text-4xl font-semibold text-[var(--color-ink)]">{item.title}</h1>
+        {item.category && <p className="text-[var(--color-ink-muted)]">{item.category}</p>}
 
         {item.image_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={item.image_url}
             alt={item.title}
-            className="w-full rounded-md object-cover max-h-64"
+            className="max-h-64 w-full rounded-2xl object-cover"
           />
         )}
 
-        <div className="border-t pt-4">
-          <h2 className="font-semibold text-gray-700 mb-2">Item QR Code</h2>
+        <div className="border-t border-[var(--color-line)] pt-5">
+          <h2 className="mb-2 font-semibold text-[var(--color-ink)]">Item QR code</h2>
+          <p className="font-utility mb-3 text-xs text-[var(--color-ink-muted)]">{item.qr_code_id}</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={qrImageUrl}
             alt="QR code for this item"
-            className="mx-auto border rounded-md"
+            className="mx-auto rounded-2xl border border-[var(--color-line)] bg-white p-3"
           />
           <a
             href={qrImageUrl}
             download={`${item.title}-qr.png`}
-            className="block text-center mt-3 text-blue-600 hover:underline text-sm"
+            className="mt-3 block rounded-full py-3 text-center text-sm font-bold text-[var(--color-primary-trust)] hover:bg-[rgb(42_111_119_/_0.08)]"
           >
             Download QR Code
           </a>

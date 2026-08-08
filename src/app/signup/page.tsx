@@ -12,9 +12,9 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
 
   const router = useRouter()
-  const supabase = createClient()
 
   const handleSignup = async (e: React.FormEvent) => {
+    const supabase = createClient()
     e.preventDefault()
     setError(null)
     setLoading(true)
@@ -42,57 +42,57 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center px-4 py-8">
       <form
         onSubmit={handleSignup}
-        className="w-full max-w-sm bg-white p-6 rounded-lg shadow-md space-y-4"
+        className="tag-card w-full max-w-sm space-y-5 p-6"
       >
-        <h1 className="text-2xl font-bold text-gray-800">Create Account</h1>
+        <h1 className="font-display pr-10 text-4xl font-semibold text-[var(--color-ink)]">Create account</h1>
 
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</p>
+          <p className="rounded-xl bg-[var(--color-alert-lost-soft)] p-3 text-sm font-medium text-[#7a3d0b]">{error}</p>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Full Name</label>
+          <label className="block text-sm font-bold text-[var(--color-ink)]">Full Name</label>
           <input
             type="text"
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="input-field mt-1"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <label className="block text-sm font-bold text-[var(--color-ink)]">Email</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="input-field mt-1"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Password</label>
+          <label className="block text-sm font-bold text-[var(--color-ink)]">Password</label>
           <input
             type="password"
             required
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="input-field mt-1"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50"
+          className="btn-primary w-full px-4 py-3 disabled:opacity-50"
         >
-          {loading ? 'Creating account...' : 'Sign Up'}
+          {loading ? 'Creating account...' : 'Create account'}
         </button>
       </form>
     </div>

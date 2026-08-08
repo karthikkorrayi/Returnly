@@ -15,9 +15,9 @@ export default function NewItemPage() {
   const [loading, setLoading] = useState(false)
 
   const router = useRouter()
-  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const supabase = createClient()
     e.preventDefault()
     setError(null)
     setLoading(true)
@@ -86,82 +86,82 @@ export default function NewItemPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
+    <div className="min-h-screen px-4 py-8">
       <form
         onSubmit={handleSubmit}
-        className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md space-y-4"
+        className="tag-card mx-auto max-w-md space-y-5 p-6"
       >
-        <h1 className="text-2xl font-bold text-gray-800">Add New Item</h1>
+        <h1 className="font-display pr-10 text-4xl font-semibold text-[var(--color-ink)]">Add a tagged item</h1>
 
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</p>
+          <p className="rounded-xl bg-[var(--color-alert-lost-soft)] p-3 text-sm font-medium text-[#7a3d0b]">{error}</p>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Title</label>
+          <label className="block text-sm font-bold text-[var(--color-ink)]">Title</label>
           <input
             type="text"
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="input-field mt-1"
             placeholder="e.g. MacBook Pro"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Category</label>
+          <label className="block text-sm font-bold text-[var(--color-ink)]">Category</label>
           <input
             type="text"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="input-field mt-1"
             placeholder="e.g. Electronics"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Description</label>
+          <label className="block text-sm font-bold text-[var(--color-ink)]">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="input-field mt-1"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-bold text-[var(--color-ink)]">
             Secret Identification Mark
           </label>
-          <p className="text-xs text-gray-500 mb-1">
+          <p className="mb-1 text-xs text-[var(--color-ink-muted)]">
             Only you can see this — used to verify a finder&apos;s claim.
           </p>
           <input
             type="text"
             value={secretMark}
             onChange={(e) => setSecretMark(e.target.value)}
-            className="mt-1 w-full border rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="input-field mt-1"
             placeholder="e.g. small scratch near the logo"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Photo</label>
+          <label className="block text-sm font-bold text-[var(--color-ink)]">Photo</label>
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-            className="mt-1 w-full text-sm"
+            className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-white/70 p-3 text-sm"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50"
+          className="btn-primary w-full px-4 py-3 disabled:opacity-50"
         >
-          {loading ? 'Saving...' : 'Save Item & Generate QR'}
+          {loading ? 'Saving tag...' : 'Save item and generate QR'}
         </button>
       </form>
     </div>
