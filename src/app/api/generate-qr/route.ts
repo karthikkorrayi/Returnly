@@ -7,6 +7,8 @@ import QRCode from 'qrcode'
 // item's qr_code_id ever needs to change.
 export async function GET(request: NextRequest) {
   const text = request.nextUrl.searchParams.get('text')
+  const widthParam = request.nextUrl.searchParams.get('width')
+  const width = widthParam ? parseInt(widthParam, 10) : 400
 
   if (!text) {
     return NextResponse.json({ error: 'Missing "text" parameter' }, { status: 400 })
@@ -15,7 +17,7 @@ export async function GET(request: NextRequest) {
   try {
     const pngBuffer = await QRCode.toBuffer(text, {
       type: 'png',
-      width: 400,
+      width: Math.min(Math.max(width, 200), 2000), 
       margin: 2,
     })
     
