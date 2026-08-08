@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import OwnerAlertFeed from './OwnerAlertFeed'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -17,6 +18,12 @@ export default async function DashboardPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
+  const { data: foundReports } = await supabase
+    .from('found_reports')
+    .select('id,item_id,finder_name,note,latitude,longitude,status,created_at,items(title)')
+    .neq('status', 'resolved')
+    .order('created_at', { ascending: false })
+
   return (
     <main className="min-h-screen px-4 py-8">
       <div className="mx-auto max-w-6xl">
@@ -26,9 +33,14 @@ export default async function DashboardPage() {
             <h1 className="font-display mt-2 text-5xl font-semibold text-[var(--color-ink)]">Your tagged items</h1>
             <p className="mt-3 max-w-2xl text-[var(--color-ink-muted)]">Monitor every physical tag, switch into Lost Mode quickly, and see reward status at a glance.</p>
           </div>
-          <Link href="/dashboard/items/new" className="btn-primary px-5 py-3 text-sm">
-            Add item tag
-          </Link>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link href="/dashboard/profile" className="min-h-11 rounded-full border border-[var(--color-line)] bg-white/70 px-5 py-3 text-center text-sm font-bold text-[var(--color-ink)] hover:bg-white">
+              Profile
+            </Link>
+            <Link href="/dashboard/items/new" className="btn-primary px-5 py-3 text-sm">
+              Add item tag
+            </Link>
+          </div>
         </div>
 
         {!items || items.length === 0 ? (
@@ -55,6 +67,8 @@ export default async function DashboardPage() {
             ))}
           </div>
         )}
+
+        <OwnerAlertFeed initialReports={foundReports ?? []} />
       </div>
     </main>
   )
