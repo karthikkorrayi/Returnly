@@ -87,11 +87,12 @@ export default function NewItemPage() {
 
   return (
     <div className="min-h-screen px-4 py-8">
-      <form
-        onSubmit={handleSubmit}
-        className="tag-card mx-auto max-w-md space-y-5 p-6"
-      >
-        <h1 className="font-display pr-10 text-4xl font-semibold text-[var(--color-ink)]">Add a tagged item</h1>
+      <form onSubmit={handleSubmit} className="tag-card mx-auto max-w-2xl space-y-6 p-6 sm:p-8">
+        <div className="pr-10">
+          <p className="font-utility text-xs font-bold uppercase text-[var(--color-primary-trust-dark)]">New physical tag</p>
+          <h1 className="font-display mt-2 text-4xl font-semibold text-[var(--color-ink)] sm:text-5xl">Add a tagged item</h1>
+          <p className="mt-3 text-[var(--color-ink-muted)]">Use the real item details that will help you recognize it later. Private fields stay owner-only.</p>
+        </div>
 
         {error && (
           <p className="rounded-xl bg-[var(--color-alert-lost-soft)] p-3 text-sm font-medium text-[#7a3d0b]">{error}</p>
@@ -132,10 +133,10 @@ export default function NewItemPage() {
 
         <div>
           <label className="block text-sm font-bold text-[var(--color-ink)]">
-            Secret Identification Mark
+            Secret identification mark <span className="text-[#7a3d0b]">(private — only you can see this)</span>
           </label>
           <p className="mb-1 text-xs text-[var(--color-ink-muted)]">
-            Only you can see this — used to verify a finder&apos;s claim.
+            Use this to verify a finder&apos;s claim without exposing the detail publicly.
           </p>
           <input
             type="text"
@@ -147,7 +148,7 @@ export default function NewItemPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-[var(--color-ink)]">Photo</label>
+          <label className="block text-sm font-bold text-[var(--color-ink)]">Photo upload</label>
           <input
             type="file"
             accept="image/*"

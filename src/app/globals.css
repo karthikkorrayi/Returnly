@@ -191,3 +191,66 @@ textarea {
   62% { transform: scale(1.04); }
   100% { transform: scale(1); }
 }
+
+.tag-card-lost {
+  border-color: rgb(232 135 58 / 0.7);
+  background:
+    linear-gradient(135deg, var(--color-alert-lost-soft), var(--color-surface-raised) 48%),
+    var(--color-surface-raised);
+  box-shadow: 0 18px 38px rgb(232 135 58 / 0.18);
+}
+
+.tag-card-lost::after {
+  border-top-color: rgb(232 135 58 / 0.28);
+}
+
+.status-reward {
+  background: rgb(255 255 255 / 0.72);
+  color: #7a3d0b;
+}
+
+.lost-mode-page {
+  background:
+    radial-gradient(circle at top right, rgb(232 135 58 / 0.28), transparent 30rem),
+    radial-gradient(circle at bottom left, rgb(232 135 58 / 0.14), transparent 34rem);
+}
+
+.lost-mode-panel {
+  border-color: var(--color-line);
+  background: rgb(255 255 255 / 0.72);
+}
+
+.lost-mode-panel-on {
+  border-color: rgb(232 135 58 / 0.7);
+  background: linear-gradient(135deg, var(--color-alert-lost-soft), rgb(255 255 255 / 0.76));
+}
+
+.lost-toggle {
+  min-width: 9rem;
+  min-height: 3.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.7rem;
+  border-radius: 999px;
+  border: 2px solid rgb(42 111 119 / 0.25);
+  background: rgb(42 111 119 / 0.1);
+  padding: 0.35rem 1rem 0.35rem 0.4rem;
+  color: var(--color-primary-trust-dark);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.lost-toggle-on {
+  border-color: rgb(232 135 58 / 0.82);
+  background: var(--color-alert-lost);
+  color: #29190d;
+}
+
+.lost-toggle-knob {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  background: white;
+  box-shadow: 0 6px 14px rgb(36 33 29 / 0.18);
+}
