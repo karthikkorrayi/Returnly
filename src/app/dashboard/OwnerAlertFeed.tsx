@@ -7,7 +7,7 @@ type FoundReport = {
   id: string
   item_id: string
   finder_name: string | null
-  note: string | null
+  notes: string | null
   latitude: number | null
   longitude: number | null
   status: string | null
@@ -68,7 +68,7 @@ export default function OwnerAlertFeed({ initialReports }: OwnerAlertFeedProps) 
           const insertedReport = payload.new as FoundReport
           const { data } = await supabase
             .from('found_reports')
-            .select('id,item_id,finder_name,note,latitude,longitude,status,created_at,items(title)')
+            .select('id,item_id,finder_name,notes,latitude,longitude,status,created_at,items(title)')
             .eq('id', insertedReport.id)
             .single<FoundReport>()
 
@@ -175,7 +175,7 @@ export default function OwnerAlertFeed({ initialReports }: OwnerAlertFeedProps) 
                       </div>
                       <h3 className="mt-3 text-2xl font-black text-[var(--color-ink)]">{reportItemTitle(report)}</h3>
                       <p className="mt-1 text-sm font-bold text-[var(--color-ink-muted)]">Finder: {report.finder_name || 'Helpful finder'}</p>
-                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-[var(--color-ink-muted)]">{report.note || 'No note included yet.'}</p>
+                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-[var(--color-ink-muted)]">{report.notes || 'No note included yet.'}</p>
                       <p className="font-utility mt-3 text-xs font-bold uppercase text-[var(--color-ink-muted)]">{formatCoordinates(report.latitude, report.longitude)}</p>
                     </div>
                     <button type="button" className="btn-recovered px-5 py-3" disabled={isResolving} onClick={() => markAsRecovered(report.id, report.item_id)}>

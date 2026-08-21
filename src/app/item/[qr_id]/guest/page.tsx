@@ -16,7 +16,7 @@ export default async function GuestReportPage({
   const supabase = await createClient()
 
   const { data: item, error } = await supabase
-    .from('items')
+    .from('items_public')
     .select('title,is_lost')
     .eq('qr_code_id', qrId)
     .single<GuestItem>()

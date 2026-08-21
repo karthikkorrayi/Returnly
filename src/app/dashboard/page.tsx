@@ -18,11 +18,17 @@ export default async function DashboardPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  const { data: foundReports } = await supabase
+  const { data: foundReports, error: foundReportsError } = await supabase
     .from('found_reports')
-    .select('id,item_id,finder_name,note,latitude,longitude,status,created_at,items(title)')
+    .select('id,item_id,finder_name,notes,latitude,longitude,status,created_at,items(title)')
     .neq('status', 'resolved')
     .order('created_at', { ascending: false })
+
+  if (foundReportsError) {
+    // Don't swallow this silently — log it so a broken query is loud,
+    // not an empty feed that looks intentional
+    console.error('Failed to load found reports:', foundReportsError.message)
+  }
 
   return (
     <main className="min-h-screen px-4 py-8">

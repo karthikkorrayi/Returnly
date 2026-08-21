@@ -128,7 +128,7 @@ export default async function PublicItemPage({
   const supabase = await createClient()
 
   const { data: item, error } = await supabase
-    .from('items')
+    .from('items_public')
     .select('title,category,description,image_url,is_lost,reward_amount')
     .eq('qr_code_id', qrId)
     .single()
