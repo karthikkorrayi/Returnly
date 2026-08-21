@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   const { data: foundReports, error: foundReportsError } = await supabase
     .from('found_reports')
-    .select('id,item_id,finder_name,notes,latitude,longitude,status,created_at,items(title)')
+    .select('id,item_id,finder_name,notes,found_image_url,latitude,longitude,status,created_at,items(title)')
     .neq('status', 'resolved')
     .order('created_at', { ascending: false })
 
@@ -43,16 +43,15 @@ export default async function DashboardPage() {
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {items.map((item) => (
               <Link key={item.id} href={`/dashboard/items/${item.id}`} className={`tag-card block p-5 hover:-translate-y-0.5 ${item.is_lost ? 'tag-card-lost' : ''}`}>
-                <div className="flex min-h-52 flex-col justify-between gap-5 pr-8">
+                <div className="flex min-h-36 flex-col gap-5 pr-8">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {item.is_lost ? <span className="status-pill status-lost">! Lost</span> : <span className="status-pill status-safe">✓ Safe</span>}
+                    {item.is_lost && <span className="status-pill status-reward">{item.reward_amount ? 'Reward set' : 'No reward yet'}</span>}
+                  </div>
                   <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {item.is_lost ? <span className="status-pill status-lost">! Lost</span> : <span className="status-pill status-safe">✓ Safe</span>}
-                      {item.is_lost && <span className="status-pill status-reward">{item.reward_amount ? 'Reward set' : 'No reward yet'}</span>}
-                    </div>
-                    <h2 className="font-display mt-5 text-3xl font-semibold text-[var(--color-ink)]">{item.title}</h2>
+                    <h2 className="font-display text-3xl font-semibold text-[var(--color-ink)]">{item.title}</h2>
                     <p className="mt-2 text-sm font-bold text-[var(--color-ink-muted)]">{item.category || 'Uncategorized'}</p>
                   </div>
-                  <p className="text-sm text-[var(--color-ink-muted)] line-clamp-2">{item.description || 'No description added.'}</p>
                 </div>
               </Link>
             ))}

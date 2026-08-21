@@ -188,8 +188,18 @@ export default function ItemDetailClient({ item, fulfillmentStatus }: ItemDetail
             <p className="status-pill status-safe">Tag ordered</p>
             <h2 className="font-display mt-4 text-3xl font-semibold text-[var(--color-ink)]">Physical QR tag</h2>
             <p className="mt-2 text-sm text-[var(--color-ink-muted)]">
-              Your tag is prepared and mailed by the Returnly QR Department. It isn&apos;t available to view or download from the app.
+              This is a soft-copy preview only — the printed tag is prepared and mailed by the Returnly QR Department.
             </p>
+
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/generate-qr?text=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL}/item/${item.qr_code_id}`)}&width=280`}
+              alt="Soft-copy preview of this item's QR tag — view only"
+              className="mx-auto mt-4 w-40 rounded-2xl border border-[var(--color-line)] bg-white p-2 shadow-inner"
+              draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
+            />
+
             <div className="mt-4 rounded-2xl bg-[var(--color-base-bg)] p-4">
               <p className="text-xs font-bold uppercase text-[var(--color-ink-muted)]">Order status</p>
               <p className="mt-1 text-lg font-black text-[var(--color-ink)]">

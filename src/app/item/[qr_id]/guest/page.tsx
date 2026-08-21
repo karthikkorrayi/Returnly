@@ -3,6 +3,7 @@ import GuestReportFlow from './GuestReportFlow'
 import { createClient } from '@/lib/supabase/server'
 
 type GuestItem = {
+  id: string
   title: string
   is_lost: boolean
 }
@@ -17,7 +18,7 @@ export default async function GuestReportPage({
 
   const { data: item, error } = await supabase
     .from('items_public')
-    .select('title,is_lost')
+    .select('id,title,is_lost')
     .eq('qr_code_id', qrId)
     .single<GuestItem>()
 
@@ -25,5 +26,5 @@ export default async function GuestReportPage({
     notFound()
   }
 
-  return <GuestReportFlow itemTitle={item.title} />
+  return <GuestReportFlow itemId={item.id} itemTitle={item.title} />
 }

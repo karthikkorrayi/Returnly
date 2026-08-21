@@ -1,6 +1,8 @@
 'use client'
 
 import { FormEvent, useMemo, useState } from 'react'
+import { nanoid } from 'nanoid'
+import { createClient } from '@/lib/supabase/client'
 
 type Step = 'contact' | 'otp' | 'details' | 'done'
 
@@ -17,18 +19,21 @@ const steps: { id: Step; label: string }[] = [
   { id: 'done', label: 'Sent' },
 ]
 
-export default function GuestReportFlow({ itemTitle }: { itemTitle: string }) {
+export default function GuestReportFlow({ itemId, itemTitle }: { itemId: string; itemTitle: string }) {
   const [step, setStep] = useState<Step>('contact')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
   const [notes, setNotes] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [location, setLocation] = useState<LocationState>({
     latitude: null,
     longitude: null,
     status: 'idle',
   })
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const currentStepIndex = useMemo(
     () => steps.findIndex((candidate) => candidate.id === step),
@@ -42,11 +47,57 @@ export default function GuestReportFlow({ itemTitle }: { itemTitle: string }) {
 
   function handleOtpSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    // NOTE: placeholder step — accepts any input, no real verification
+    // yet. Deliberately deferred; see project notes before treating this
+    // as a real bot/spam guard.
     setStep('details')
   }
 
-  function handleDetailsSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleDetailsSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setSubmitError(null)
+    setSubmitting(true)
+
+    const supabase = createClient()
+    let foundImageUrl: string | null = null
+
+    if (imageFile) {
+      const filePath = `${itemId}/${nanoid()}-${imageFile.name}`
+      const { error: uploadError } = await supabase.storage
+        .from('found-report-images')
+        .upload(filePath, imageFile)
+
+      if (uploadError) {
+        setSubmitError(`Photo upload failed: ${uploadError.message}`)
+        setSubmitting(false)
+        return
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('found-report-images').getPublicUrl(filePath)
+      foundImageUrl = publicUrl
+    }
+
+    const { error: insertError } = await supabase.from('found_reports').insert({
+      item_id: itemId,
+      finder_type: 'guest',
+      finder_name: name,
+      finder_phone: phone,
+      notes,
+      found_image_url: foundImageUrl,
+      latitude: location.status === 'shared' ? location.latitude : null,
+      longitude: location.status === 'shared' ? location.longitude : null,
+      status: 'pending',
+    })
+
+    setSubmitting(false)
+
+    if (insertError) {
+      setSubmitError(insertError.message)
+      return
+    }
+
     setStep('done')
   }
 
@@ -152,13 +203,30 @@ export default function GuestReportFlow({ itemTitle }: { itemTitle: string }) {
                 <p className="status-pill status-safe mb-4 w-fit">Step 3</p>
                 <h2 className="text-3xl font-black leading-9 text-[var(--color-ink)]">Add a helpful note</h2>
                 <p className="mt-2 text-base font-semibold leading-6 text-[var(--color-ink-muted)]">
-                  Tell the owner where you found it or when you can meet. Sharing location is optional, but it helps them know the right place to meet up.
+                  Tell the owner where you found it or when you can meet. A photo and location are optional, but both help them act quickly.
                 </p>
               </div>
+
+              {submitError && (
+                <p className="rounded-2xl bg-[var(--color-alert-lost-soft)] p-3 text-sm font-bold text-[#7a3d0b]">{submitError}</p>
+              )}
+
               <label className="block text-sm font-black text-[var(--color-ink)]">
                 Note to owner
                 <textarea className="input-field mt-2 min-h-32 resize-none" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Found near the front desk. I can wait here for 10 minutes." />
               </label>
+
+              <label className="block text-sm font-black text-[var(--color-ink)]">
+                Photo of where you found it (optional)
+                <input
+                  className="mt-2 w-full rounded-xl border border-[var(--color-line)] bg-white/70 p-3 text-sm"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={(event) => setImageFile(event.target.files?.[0] ?? null)}
+                />
+              </label>
+
               <div className="rounded-3xl border border-[var(--color-line)] bg-[var(--color-alert-lost-soft)]/55 p-4">
                 <p className="text-sm font-black text-[var(--color-ink)]">Why location?</p>
                 <p className="mt-1 text-sm font-semibold leading-6 text-[var(--color-ink-muted)]">
@@ -171,7 +239,10 @@ export default function GuestReportFlow({ itemTitle }: { itemTitle: string }) {
                 {location.status === 'denied' && <p className="mt-2 text-sm font-bold text-[#7a3d0b]">No problem — you can still send the report without location.</p>}
                 {location.status === 'unavailable' && <p className="mt-2 text-sm font-bold text-[#7a3d0b]">This browser does not support location sharing.</p>}
               </div>
-              <button className="btn-lost w-full px-5 py-3" type="submit">Send report to owner</button>
+
+              <button className="btn-lost w-full px-5 py-3 disabled:opacity-60" type="submit" disabled={submitting}>
+                {submitting ? 'Sending…' : 'Send report to owner'}
+              </button>
             </form>
           )}
 

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import ProfileForm from './ProfileForm'
 import WalletCard from './WalletCard'
+import QrOrdersList from './QrOrdersList'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -14,6 +15,12 @@ export default async function ProfilePage() {
     .select('full_name,phone_number,address,reputation_score,wallet_balance,credits,has_finder_badge')
     .eq('id', user!.id)
     .single()
+
+  const { data: qrOrders } = await supabase
+    .from('qr_fulfillment_orders')
+    .select('id,status,amount_charged,created_at,items(title,qr_code_id)')
+    .eq('user_id', user!.id)
+    .order('created_at', { ascending: false })
 
   return (
     <main className="px-4 py-8">
@@ -34,6 +41,8 @@ export default async function ProfilePage() {
           credits={profile?.credits ?? 0}
           hasFinderBadge={profile?.has_finder_badge ?? false}
         />
+
+        <QrOrdersList orders={qrOrders ?? []} />
       </section>
     </main>
   )
