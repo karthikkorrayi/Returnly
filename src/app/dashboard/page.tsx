@@ -1,17 +1,9 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import OwnerAlertFeed from './OwnerAlertFeed'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
 
   const { data: items } = await supabase
     .from('items')
@@ -25,13 +17,11 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
 
   if (foundReportsError) {
-    // Don't swallow this silently — log it so a broken query is loud,
-    // not an empty feed that looks intentional
     console.error('Failed to load found reports:', foundReportsError.message)
   }
 
   return (
-    <main className="min-h-screen px-4 py-8">
+    <main className="px-4 py-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
@@ -39,14 +29,9 @@ export default async function DashboardPage() {
             <h1 className="font-display mt-2 text-5xl font-semibold text-[var(--color-ink)]">Your tagged items</h1>
             <p className="mt-3 max-w-2xl text-[var(--color-ink-muted)]">Monitor every physical tag, switch into Lost Mode quickly, and see reward status at a glance.</p>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Link href="/dashboard/profile" className="min-h-11 rounded-full border border-[var(--color-line)] bg-white/70 px-5 py-3 text-center text-sm font-bold text-[var(--color-ink)] hover:bg-white">
-              Profile
-            </Link>
-            <Link href="/dashboard/items/new" className="btn-primary px-5 py-3 text-sm">
-              Add item tag
-            </Link>
-          </div>
+          <Link href="/dashboard/items/new" className="btn-primary px-5 py-3 text-sm">
+            Add item tag
+          </Link>
         </div>
 
         {!items || items.length === 0 ? (

@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function ProfilePage() {
@@ -8,18 +7,14 @@ export default async function ProfilePage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
-
   const { data: profile } = await supabase
     .from('profiles')
     .select('full_name,phone_number,reputation_score')
-    .eq('id', user.id)
+    .eq('id', user!.id)
     .single()
 
   return (
-    <main className="min-h-screen px-4 py-8">
+    <main className="px-4 py-8">
       <section className="mx-auto max-w-3xl">
         <Link href="/dashboard" className="text-sm font-bold text-[var(--color-primary-trust-dark)] hover:underline">← Back to dashboard</Link>
         <article className="tag-card mt-6 p-6 sm:p-8">

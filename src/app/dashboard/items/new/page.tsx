@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { nanoid } from 'nanoid'
 import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
 
 export default function NewItemPage() {
   const [title, setTitle] = useState('')
@@ -89,6 +90,7 @@ export default function NewItemPage() {
     <div className="min-h-screen px-4 py-8">
       <form onSubmit={handleSubmit} className="tag-card mx-auto max-w-2xl space-y-6 p-6 sm:p-8">
         <div className="pr-10">
+          <Link href="/dashboard" className="text-sm font-bold text-[var(--color-primary-trust-dark)] hover:underline">← Back to dashboard</Link>
           <p className="font-utility text-xs font-bold uppercase text-[var(--color-primary-trust-dark)]">New physical tag</p>
           <h1 className="font-display mt-2 text-4xl font-semibold text-[var(--color-ink)] sm:text-5xl">Add a tagged item</h1>
           <p className="mt-3 text-[var(--color-ink-muted)]">Use the real item details that will help you recognize it later. Private fields stay owner-only.</p>

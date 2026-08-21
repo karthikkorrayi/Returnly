@@ -143,6 +143,14 @@ export default function SignupPage() {
           {loading ? 'Creating account…' : 'Create account'}
         </button>
 
+        {/* <button
+          type="button"
+          onClick={() => setSubmittedEmail('')}
+          className="mt-3 w-full text-center text-sm font-bold text-[var(--color-ink-muted)] hover:underline"
+        >
+          ← Entered the wrong email? Go back
+        </button> */}
+
         <p className="mt-5 text-center text-sm text-[var(--color-ink-muted)]">
           Already have an account?{' '}
           <Link href="/login" className="font-bold text-[var(--color-primary-trust)] hover:text-[var(--color-primary-trust-dark)]">

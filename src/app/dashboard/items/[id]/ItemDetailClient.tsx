@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
 
 type ItemDetail = {
   id: string
@@ -89,6 +90,7 @@ export default function ItemDetailClient({ item, qrImageUrl, scanUrl }: ItemDeta
   return (
     <div className={`min-h-screen px-4 py-8 ${isLost ? 'lost-mode-page' : ''}`}>
       <article className={`tag-card mx-auto max-w-5xl p-5 sm:p-7 ${isLost ? 'tag-card-lost' : ''}`}>
+        <Link href="/dashboard" className="mb-4 inline-block text-sm font-bold text-[var(--color-primary-trust-dark)] hover:underline">← Back to dashboard</Link>
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <section className="space-y-6 pr-0 sm:pr-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
