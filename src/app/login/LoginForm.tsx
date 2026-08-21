@@ -13,6 +13,7 @@ export default function LoginForm() {
 
   const router = useRouter()
   const searchParams = useSearchParams()
+  const searchParamsResetFlag = searchParams.get('reset')
   // Where to send the user after login — defaults to the dashboard,
   // but respects a ?next= param set by pages like the lost-item scan page
   const next = searchParams.get('next') || '/dashboard'
@@ -48,6 +49,12 @@ export default function LoginForm() {
           <p className="font-utility text-xs font-bold uppercase text-[var(--color-primary-trust)]">Returnly</p>
           <h1 className="font-display text-4xl font-semibold leading-none text-[var(--color-ink)]">Log in</h1>
         </div>
+
+        {searchParamsResetFlag === 'success' && !error && (
+        <p className="mb-5 rounded-xl border border-[var(--color-primary-trust)]/30 bg-[var(--color-primary-trust)]/10 p-3 text-sm font-medium text-[var(--color-primary-trust-dark)]">
+            Password updated. Log in with your new password.
+        </p>
+        )}
 
         {error && (
           <div className="mb-5 flex items-start justify-between gap-3 rounded-xl border border-[var(--color-alert-lost)]/30 bg-[var(--color-alert-lost-soft)] p-3 text-sm font-medium text-[#7a3d0b]" role="alert">
@@ -89,6 +96,11 @@ export default function LoginForm() {
               className="input-field mt-1"
             />
           </div>
+            <p className="text-right text-sm">
+                <Link href="/forgot-password" className="font-bold text-[var(--color-primary-trust-dark)] hover:underline">
+                    Forgot password?
+                </Link>
+            </p>
         </div>
 
         <button
