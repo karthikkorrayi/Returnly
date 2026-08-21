@@ -1,8 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Link from 'next/link'
 
 type ItemDetail = {
   id: string
@@ -19,17 +19,23 @@ type ItemDetail = {
 
 type ItemDetailClientProps = {
   item: ItemDetail
-  qrImageUrl: string
-  scanUrl: string
+  fulfillmentStatus: string | null
 }
 
-const currencyFormatter = new Intl.NumberFormat('en-US', {
+const currencyFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
-  currency: 'USD',
+  currency: 'INR',
   maximumFractionDigits: 0,
 })
 
-export default function ItemDetailClient({ item, qrImageUrl, scanUrl }: ItemDetailClientProps) {
+const fulfillmentStatusLabel: Record<string, string> = {
+  pending_printing: 'Preparing to print',
+  printed: 'Printed',
+  shipped: 'Shipped',
+  delivered: 'Delivered',
+}
+
+export default function ItemDetailClient({ item, fulfillmentStatus }: ItemDetailClientProps) {
   const [isLost, setIsLost] = useState(item.is_lost)
   const [rewardAmount, setRewardAmount] = useState(item.reward_amount?.toString() ?? '')
   const [saving, setSaving] = useState(false)
@@ -48,7 +54,16 @@ export default function ItemDetailClient({ item, qrImageUrl, scanUrl }: ItemDeta
 
   const updateLostSettings = async (nextIsLost: boolean, nextRewardAmount = rewardAmount) => {
     const supabase = createClient()
-    const normalizedReward = nextIsLost && nextRewardAmount ? Number(nextRewardAmount) : null
+    const numericReward = nextRewardAmount ? Number(nextRewardAmount) : null
+
+    // Minimum reward floor: if a reward is set at all, it must be ≥ ₹20.
+    // Empty/zero is still allowed — no reward is a valid choice.
+    if (nextIsLost && numericReward !== null && numericReward > 0 && numericReward < 20) {
+      setError('Reward must be at least ₹20, or left empty for no reward.')
+      return
+    }
+
+    const normalizedReward = nextIsLost && numericReward ? numericReward : null
 
     setSaving(true)
     setError(null)
@@ -91,6 +106,7 @@ export default function ItemDetailClient({ item, qrImageUrl, scanUrl }: ItemDeta
     <div className={`min-h-screen px-4 py-8 ${isLost ? 'lost-mode-page' : ''}`}>
       <article className={`tag-card mx-auto max-w-5xl p-5 sm:p-7 ${isLost ? 'tag-card-lost' : ''}`}>
         <Link href="/dashboard" className="mb-4 inline-block text-sm font-bold text-[var(--color-primary-trust-dark)] hover:underline">← Back to dashboard</Link>
+
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <section className="space-y-6 pr-0 sm:pr-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -127,10 +143,10 @@ export default function ItemDetailClient({ item, qrImageUrl, scanUrl }: ItemDeta
               {isLost && (
                 <div className="mt-5 rounded-2xl bg-white/70 p-4">
                   <label className="block text-sm font-bold text-[var(--color-ink)]" htmlFor="reward">
-                    Optional reward amount
+                    Optional reward amount (min ₹20)
                   </label>
                   <div className="mt-2 flex items-center gap-3">
-                    <span className="text-lg font-extrabold text-[#7a3d0b]">$</span>
+                    <span className="text-lg font-extrabold text-[#7a3d0b]">₹</span>
                     <input
                       id="reward"
                       min="0"
@@ -169,17 +185,18 @@ export default function ItemDetailClient({ item, qrImageUrl, scanUrl }: ItemDeta
           </section>
 
           <aside className="rounded-[1.35rem] border border-[var(--color-line)] bg-white/78 p-5 shadow-[var(--shadow-soft)]">
-            <p className="status-pill status-safe">Print-ready tag</p>
-            <h2 className="font-display mt-4 text-3xl font-semibold text-[var(--color-ink)]">Generated QR code</h2>
+            <p className="status-pill status-safe">Tag ordered</p>
+            <h2 className="font-display mt-4 text-3xl font-semibold text-[var(--color-ink)]">Physical QR tag</h2>
             <p className="mt-2 text-sm text-[var(--color-ink-muted)]">
-              Download this large QR code and print it onto a physical tag, label, or card attached to the item.
+              Your tag is prepared and mailed by the Returnly QR Department. It isn&apos;t available to view or download from the app.
             </p>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrImageUrl} alt="QR code for this item" className="mx-auto mt-5 w-full max-w-[320px] rounded-3xl border border-[var(--color-line)] bg-white p-4" />
-            <a href={qrImageUrl} download={`${item.title}-print-qr.png`} className="btn-primary mt-5 w-full px-5 py-3">
-              Download QR Code
-            </a>
-            <p className="mt-3 break-all rounded-2xl bg-[var(--color-base-bg)] p-3 text-xs text-[var(--color-ink-muted)]">Scan destination: {scanUrl}</p>
+            <div className="mt-4 rounded-2xl bg-[var(--color-base-bg)] p-4">
+              <p className="text-xs font-bold uppercase text-[var(--color-ink-muted)]">Order status</p>
+              <p className="mt-1 text-lg font-black text-[var(--color-ink)]">
+                {fulfillmentStatus ? (fulfillmentStatusLabel[fulfillmentStatus] ?? fulfillmentStatus) : 'No order on file'}
+              </p>
+            </div>
+            <p className="mt-3 break-all rounded-2xl bg-[var(--color-base-bg)] p-3 text-xs text-[var(--color-ink-muted)]">Reference code: {item.qr_code_id}</p>
           </aside>
         </div>
       </article>

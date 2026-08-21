@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 type PublicItem = {
+  user_id: string
   title: string
   category: string
   description: string | null
@@ -11,9 +12,9 @@ type PublicItem = {
   reward_amount: number | null
 }
 
-const rewardFormatter = new Intl.NumberFormat('en-US', {
+const rewardFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
-  currency: 'USD',
+  currency: 'INR',
   maximumFractionDigits: 0,
 })
 
@@ -64,7 +65,7 @@ function SafeState() {
   )
 }
 
-function LostState({ item, qrId }: { item: PublicItem; qrId: string }) {
+function LostState({ item, qrId, ownerName }: { item: PublicItem; qrId: string; ownerName: string }) {
   const reward = item.reward_amount && item.reward_amount > 0
     ? rewardFormatter.format(item.reward_amount)
     : null
@@ -89,6 +90,10 @@ function LostState({ item, qrId }: { item: PublicItem; qrId: string }) {
               <h1 className="font-display mt-2 text-5xl font-semibold leading-[0.95] tracking-tight text-[var(--color-ink)]">
                 {item.title}
               </h1>
+              <p className="mt-3 text-lg font-bold leading-7 text-[var(--color-ink)]">
+                This {item.title.toLowerCase()} belongs to {ownerName}.
+                {reward ? ` Take a ${reward} reward and help return it.` : ' Help return it to its owner.'}
+              </p>
               {item.description && (
                 <p className="mt-4 text-lg font-medium leading-7 text-[var(--color-ink)]">
                   {item.description}
@@ -129,7 +134,7 @@ export default async function PublicItemPage({
 
   const { data: item, error } = await supabase
     .from('items_public')
-    .select('title,category,description,image_url,is_lost,reward_amount')
+    .select('user_id,title,category,description,image_url,is_lost,reward_amount')
     .eq('qr_code_id', qrId)
     .single()
 
@@ -137,5 +142,17 @@ export default async function PublicItemPage({
     notFound()
   }
 
-  return item.is_lost ? <LostState item={item} qrId={qrId} /> : <SafeState />
+  if (!item.is_lost) {
+    return <SafeState />
+  }
+
+  // Only fetch the owner's name when actually needed (lost state) —
+  // no reason to spend a query on the safe path
+  const { data: owner } = await supabase
+    .from('profiles_public')
+    .select('full_name')
+    .eq('id', item.user_id)
+    .single()
+
+  return <LostState item={item} qrId={qrId} ownerName={owner?.full_name || 'the owner'} />
 }

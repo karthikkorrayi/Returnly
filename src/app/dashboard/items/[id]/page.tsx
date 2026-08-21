@@ -10,8 +10,6 @@ export default async function ItemDetailPage({
   const { id } = await params
   const supabase = await createClient()
 
-  // RLS ensures this only returns a row if the current user owns it —
-  // no need for a manual user_id check here, the database enforces it
   const { data: item, error } = await supabase
     .from('items')
     .select('id,title,category,description,secret_identification_mark,image_url,qr_code_id,is_lost,reward_amount,created_at')
@@ -22,9 +20,11 @@ export default async function ItemDetailPage({
     notFound()
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-  const scanUrl = `${siteUrl}/item/${item.qr_code_id}`
-  const qrImageUrl = `/api/generate-qr?text=${encodeURIComponent(scanUrl)}&width=1200`
+  const { data: order } = await supabase
+    .from('qr_fulfillment_orders')
+    .select('status')
+    .eq('item_id', id)
+    .maybeSingle()
 
-  return <ItemDetailClient item={item} qrImageUrl={qrImageUrl} scanUrl={scanUrl} />
+  return <ItemDetailClient item={item} fulfillmentStatus={order?.status ?? null} />
 }
