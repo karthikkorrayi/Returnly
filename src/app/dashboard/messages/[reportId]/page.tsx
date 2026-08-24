@@ -21,7 +21,7 @@ export default async function MessagesPage({
 
   const { data: report, error } = await supabase
     .from('found_reports')
-    .select('id,item_id,finder_id,finder_name,status,items(title,user_id)')
+    .select('id,item_id,finder_id,finder_name,status,chat_status')
     .eq('id', reportId)
     .single()
 
@@ -29,8 +29,17 @@ export default async function MessagesPage({
     notFound()
   }
 
-  const itemRecord = Array.isArray(report.items) ? report.items[0] : report.items
-  const isOwner = itemRecord?.user_id === user.id
+  // Fetch the item via items_public instead of embedding items(...) —
+  // the base `items` table is owner-only under RLS, so embedding it
+  // silently returns null for the finder's side. This was a real bug:
+  // finders always saw "this item" instead of the real title.
+  const { data: item } = await supabase
+    .from('items_public')
+    .select('title,user_id')
+    .eq('id', report.item_id)
+    .single()
+
+  const isOwner = item?.user_id === user.id
   const isFinder = report.finder_id === user.id
 
   if (!isOwner && !isFinder) {
@@ -48,8 +57,10 @@ export default async function MessagesPage({
       reportId={reportId}
       currentUserId={user.id}
       isOwner={isOwner}
-      itemTitle={itemRecord?.title ?? 'this item'}
+      otherPartyName={isOwner ? report.finder_name || 'Finder' : 'the owner'}
+      itemTitle={item?.title ?? 'this item'}
       reportStatus={report.status ?? 'pending'}
+      chatStatus={report.chat_status}
       initialMessages={initialMessages ?? []}
       justConnected={justConnected === '1'}
     />

@@ -9,8 +9,10 @@ type ChatThreadProps = {
   reportId: string
   currentUserId: string
   isOwner: boolean
+  otherPartyName: string
   itemTitle: string
   reportStatus: string
+  chatStatus: string | null
   initialMessages: Message[]
   justConnected: boolean
 }
@@ -19,8 +21,10 @@ export default function ChatThread({
   reportId,
   currentUserId,
   isOwner,
+  otherPartyName,
   itemTitle,
   reportStatus,
+  chatStatus,
   initialMessages,
   justConnected,
 }: ChatThreadProps) {
@@ -28,12 +32,16 @@ export default function ChatThread({
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [resolving, setResolving] = useState(false)
+  const [accepting, setAccepting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showWelcome, setShowWelcome] = useState(justConnected)
   const [resolved, setResolved] = useState(reportStatus === 'resolved')
+  const [status, setStatus] = useState(chatStatus)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (status !== 'accepted') return
+
     const supabase = createClient()
     const channel = supabase
       .channel(`report-messages-${reportId}`)
@@ -50,11 +58,25 @@ export default function ChatThread({
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [reportId])
+  }, [reportId, status])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  async function acceptChat() {
+    setAccepting(true)
+    setError(null)
+    const supabase = createClient()
+    const { error: acceptError } = await supabase.from('found_reports').update({ chat_status: 'accepted' }).eq('id', reportId)
+    setAccepting(false)
+
+    if (acceptError) {
+      setError(acceptError.message)
+      return
+    }
+    setStatus('accepted')
+  }
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault()
@@ -108,16 +130,18 @@ export default function ChatThread({
           {showWelcome && (
             <div className="mb-5 rounded-2xl border border-[var(--color-primary-trust)]/30 bg-[var(--color-primary-trust)]/10 p-4">
               <p className="font-black text-[var(--color-primary-trust-dark)]">You&apos;re connected.</p>
-              <p className="mt-1 text-sm text-[var(--color-ink-muted)]">Message the owner below to arrange the return of {itemTitle}.</p>
-              <button type="button" onClick={() => setShowWelcome(false)} className="mt-3 text-sm font-bold text-[var(--color-primary-trust-dark)] hover:underline">
+              <button type="button" onClick={() => setShowWelcome(false)} className="mt-2 text-sm font-bold text-[var(--color-primary-trust-dark)] hover:underline">
                 Got it
               </button>
             </div>
           )}
 
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h1 className="font-display text-3xl font-semibold text-[var(--color-ink)]">{itemTitle}</h1>
-            {isOwner && !resolved && (
+            <div>
+              <h1 className="font-display text-3xl font-semibold text-[var(--color-ink)]">{itemTitle}</h1>
+              <p className="text-sm text-[var(--color-ink-muted)]">With {otherPartyName}</p>
+            </div>
+            {isOwner && status === 'accepted' && !resolved && (
               <button type="button" onClick={markRecovered} disabled={resolving} className="btn-recovered px-4 py-2 text-sm">
                 {resolving ? 'Finishing…' : 'Mark as Recovered'}
               </button>
@@ -128,6 +152,20 @@ export default function ChatThread({
             <p className="rounded-2xl bg-[var(--color-success-reunited-soft)] p-4 text-sm font-bold text-[#435f3d]">
               This item was marked recovered. The conversation has been closed and cleared.
             </p>
+          ) : status === 'requested' && isOwner ? (
+            <div className="rounded-2xl border border-[var(--color-primary-trust)]/30 bg-[var(--color-primary-trust)]/8 p-5 text-center">
+              <p className="font-black text-[var(--color-ink)]">{otherPartyName} wants to chat about {itemTitle}.</p>
+              <p className="mt-1 text-sm text-[var(--color-ink-muted)]">Accept to start messaging directly.</p>
+              {error && <p className="mt-3 text-sm font-bold text-[#7a3d0b]">{error}</p>}
+              <button type="button" onClick={acceptChat} disabled={accepting} className="btn-primary mt-4 px-6 py-3">
+                {accepting ? 'Accepting…' : 'Accept and chat'}
+              </button>
+            </div>
+          ) : status === 'requested' && !isOwner ? (
+            <div className="rounded-2xl border border-[var(--color-line)] bg-white/70 p-5 text-center">
+              <p className="font-black text-[var(--color-ink)]">Waiting for {otherPartyName} to accept.</p>
+              <p className="mt-1 text-sm text-[var(--color-ink-muted)]">You&apos;ll be able to message once they do.</p>
+            </div>
           ) : (
             <>
               <div className="h-80 space-y-3 overflow-y-auto rounded-2xl border border-[var(--color-line)] bg-white/60 p-4">

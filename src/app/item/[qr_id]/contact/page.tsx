@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import NotifyOwnerCard from './NotifyOwnerCard'
 
 export default async function ContactOwnerPage({
   params,
@@ -19,7 +20,7 @@ export default async function ContactOwnerPage({
 
   const { data: item } = await supabase
     .from('items_public')
-    .select('id,is_lost')
+    .select('id,user_id,title,is_lost')
     .eq('qr_code_id', qrId)
     .single()
 
@@ -27,44 +28,32 @@ export default async function ContactOwnerPage({
     redirect(`/item/${qrId}`)
   }
 
-  // Reuse an existing open report from this finder for this item,
-  // rather than creating a fresh one every time they revisit
+  const { data: owner } = await supabase
+    .from('profiles_public')
+    .select('full_name')
+    .eq('id', item.user_id)
+    .single()
+
   const { data: existingReport } = await supabase
     .from('found_reports')
-    .select('id')
+    .select('id,chat_status')
     .eq('item_id', item.id)
     .eq('finder_id', user.id)
     .eq('finder_type', 'registered')
     .neq('status', 'resolved')
     .maybeSingle()
 
-  let reportId = existingReport?.id
-
-  if (!reportId) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', user.id)
-      .single()
-
-    const { data: newReport, error } = await supabase
-      .from('found_reports')
-      .insert({
-        item_id: item.id,
-        finder_type: 'registered',
-        finder_id: user.id,
-        finder_name: profile?.full_name ?? 'Returnly user',
-        status: 'pending',
-      })
-      .select('id')
-      .single()
-
-    if (error || !newReport) {
-      redirect(`/item/${qrId}`)
-    }
-
-    reportId = newReport.id
+  // Already accepted — no need for the popup, go straight into the chat
+  if (existingReport?.chat_status === 'accepted') {
+    redirect(`/dashboard/messages/${existingReport.id}`)
   }
 
-  redirect(`/dashboard/messages/${reportId}?justConnected=1`)
+  return (
+    <NotifyOwnerCard
+      itemId={item.id}
+      itemTitle={item.title}
+      ownerName={owner?.full_name || 'the owner'}
+      existingReportId={existingReport?.id ?? null}
+    />
+  )
 }

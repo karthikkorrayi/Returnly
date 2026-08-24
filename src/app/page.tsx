@@ -6,6 +6,9 @@ export default function Home() {
       <section className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-5xl flex-col justify-center gap-10">
         <nav className="flex items-center justify-between" aria-label="Primary">
           <div className="font-display text-2xl font-semibold text-[var(--color-primary-trust)]">Returnly</div>
+          <Link href="/scan" className="rounded-full px-4 py-3 text-sm font-bold text-[var(--color-primary-trust)] hover:bg-white/70">
+            Scan a tag
+          </Link>
           <Link href="/login" className="rounded-full px-4 py-3 text-sm font-bold text-[var(--color-primary-trust)] hover:bg-white/70">
             Log in
           </Link>

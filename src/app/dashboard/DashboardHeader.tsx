@@ -4,15 +4,13 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function DashboardHeader({ userEmail }: { userEmail: string }) {
+export default function DashboardHeader({ userEmail, chatCount }: { userEmail: string; chatCount: number }) {
   const router = useRouter()
   const pathname = usePathname()
 
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
-    // Full refresh, not just a client route change — this clears any
-    // stale data cached in Server Components from the logged-in session
     router.push('/login')
     router.refresh()
   }
@@ -32,18 +30,19 @@ export default function DashboardHeader({ userEmail }: { userEmail: string }) {
         </Link>
 
         <nav className="flex flex-wrap items-center gap-2" aria-label="Dashboard">
-          <Link href="/dashboard" className={navLinkClass('/dashboard')}>
-            Dashboard
+          <Link href="/dashboard" className={navLinkClass('/dashboard')}>Dashboard</Link>
+          <Link href="/dashboard/chats" className={`relative ${navLinkClass('/dashboard/chats')}`}>
+             Chats
+            {chatCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-alert-lost)] px-1 text-[0.65rem] font-black text-white">
+                {chatCount}
+              </span>
+            )}
           </Link>
-          <Link href="/dashboard/profile" className={navLinkClass('/dashboard/profile')}>
-            Profile
-          </Link>
+          <Link href="/scan" className={navLinkClass('/scan')}> Scan</Link>
+          <Link href="/dashboard/profile" className={navLinkClass('/dashboard/profile')}>Profile</Link>
           <span className="hidden text-sm text-[var(--color-ink-muted)] sm:inline">{userEmail}</span>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-full border border-[var(--color-line)] bg-white/70 px-4 py-2 text-sm font-bold text-[var(--color-ink)] hover:bg-white"
-          >
+          <button type="button" onClick={handleLogout} className="rounded-full border border-[var(--color-line)] bg-white/70 px-4 py-2 text-sm font-bold text-[var(--color-ink)] hover:bg-white">
             Log out
           </button>
         </nav>
