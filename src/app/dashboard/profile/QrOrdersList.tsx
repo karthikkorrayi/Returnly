@@ -1,3 +1,5 @@
+'use client'
+
 type QrOrder = {
   id: string
   status: string
