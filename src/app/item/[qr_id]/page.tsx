@@ -108,14 +108,18 @@ function LostState({ item, qrId, ownerName }: { item: PublicItem; qrId: string; 
           <p className="mt-1 px-1 text-base font-semibold leading-6 text-[var(--color-ink-muted)]">
             Choose either path. Both protect your privacy and the owner’s.
           </p>
-          <div className="mt-4 grid gap-3">
-            <Link href={`/item/${qrId}/guest`} className="min-h-20 rounded-3xl border-2 border-[var(--color-primary-trust)] bg-white px-5 py-4 text-left shadow-[var(--shadow-card)] active:scale-[0.99]">
-              <span className="block text-xl font-black text-[var(--color-primary-trust-dark)]">Continue as Guest</span>
-              <span className="mt-1 block text-base font-semibold text-[var(--color-ink-muted)]">Send a quick message without an account.</span>
+          <div className="mt-4 space-y-3">
+            <Link
+              href={`/login?next=${encodeURIComponent(`/item/${qrId}/contact`)}`}
+              className="btn-primary block w-full px-5 py-4 text-center text-lg"
+            >
+              Log in / Sign up to message the owner
             </Link>
-            <Link href={`/login?next=${encodeURIComponent(`/item/${qrId}`)}`} className="min-h-20 rounded-3xl border-2 border-[var(--color-primary-trust)] bg-white px-5 py-4 text-left shadow-[var(--shadow-card)] active:scale-[0.99]">
-              <span className="block text-xl font-black text-[var(--color-primary-trust-dark)]">Log in / Sign up</span>
-              <span className="mt-1 block text-base font-semibold text-[var(--color-ink-muted)]">Use Returnly to coordinate the return.</span>
+            <Link
+              href={`/item/${qrId}/guest`}
+              className="block text-center text-sm font-bold text-[var(--color-ink-muted)] hover:underline"
+            >
+              Continue as guest instead →
             </Link>
           </div>
         </div>

@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   const { data: foundReports, error: foundReportsError } = await supabase
     .from('found_reports')
-    .select('id,item_id,finder_name,notes,found_image_url,latitude,longitude,status,created_at,items(title)')
+    .select('id,item_id,finder_type,finder_id,finder_name,notes,found_image_url,latitude,longitude,status,created_at,items(title)')
     .neq('status', 'resolved')
     .order('created_at', { ascending: false })
 

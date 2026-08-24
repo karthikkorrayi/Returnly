@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import ProfileForm from './ProfileForm'
+import ProfileCard from './ProfileCard'
 import WalletCard from './WalletCard'
 import QrOrdersList from './QrOrdersList'
 
@@ -27,13 +27,11 @@ export default async function ProfilePage() {
       <section className="mx-auto max-w-3xl">
         <Link href="/dashboard" className="text-sm font-bold text-[var(--color-primary-trust-dark)] hover:underline">← Back to dashboard</Link>
 
-        <div className="tag-card mt-6 p-6 sm:p-8">
-          <p className="font-utility text-xs font-bold uppercase text-[var(--color-primary-trust-dark)]">Owner profile</p>
-          <p className="mt-2 text-sm font-black text-[var(--color-ink-muted)]">Reputation score</p>
-          <p className="font-display text-4xl font-semibold text-[#435f3d]">{profile?.reputation_score ?? 0}</p>
-        </div>
-
-        <ProfileForm userId={user!.id} profile={profile ?? { full_name: null, phone_number: null, address: null }} />
+        <ProfileCard
+          userId={user!.id}
+          email={user!.email ?? ''}
+          profile={profile ?? { full_name: null, phone_number: null, address: null, reputation_score: 0 }}
+        />
 
         <WalletCard
           userId={user!.id}
