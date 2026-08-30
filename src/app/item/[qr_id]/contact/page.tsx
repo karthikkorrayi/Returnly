@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import NotifyOwnerCard from './NotifyOwnerCard'
 
 export default async function ContactOwnerPage({
   params,
@@ -20,7 +19,7 @@ export default async function ContactOwnerPage({
 
   const { data: item } = await supabase
     .from('items_public')
-    .select('id,user_id,title,is_lost')
+    .select('id,title,is_lost')
     .eq('qr_code_id', qrId)
     .single()
 
@@ -28,32 +27,64 @@ export default async function ContactOwnerPage({
     redirect(`/item/${qrId}`)
   }
 
-  const { data: owner } = await supabase
-    .from('profiles_public')
-    .select('full_name')
-    .eq('id', item.user_id)
-    .single()
-
   const { data: existingReport } = await supabase
     .from('found_reports')
-    .select('id,chat_status')
+    .select('id')
     .eq('item_id', item.id)
     .eq('finder_id', user.id)
     .eq('finder_type', 'registered')
     .neq('status', 'resolved')
     .maybeSingle()
 
-  // Already accepted — no need for the popup, go straight into the chat
-  if (existingReport?.chat_status === 'accepted') {
-    redirect(`/dashboard/messages/${existingReport.id}`)
+  let reportId = existingReport?.id
+
+  if (!reportId) {
+    const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+
+    const { data: newReport, error: insertError } = await supabase
+      .from('found_reports')
+      .insert({
+        item_id: item.id,
+        finder_type: 'registered',
+        finder_id: user.id,
+        finder_name: profile?.full_name ?? 'Returnly user',
+        status: 'pending',
+        chat_status: 'requested',
+      })
+      .select('id')
+      .single()
+
+    if (insertError) {
+      if (insertError.code === '23505') {
+        // The unique index caught a race (double-click, retry, etc.) —
+        // fetch the row that actually won instead of erroring
+        const { data: winnerReport } = await supabase
+          .from('found_reports')
+          .select('id')
+          .eq('item_id', item.id)
+          .eq('finder_id', user.id)
+          .eq('finder_type', 'registered')
+          .neq('status', 'resolved')
+          .single()
+
+        reportId = winnerReport?.id
+      }
+    } else {
+      reportId = newReport.id
+
+      // Default first message — only on genuine creation, so revisiting
+      // an existing chat never re-sends the greeting
+      await supabase.from('messages').insert({
+        report_id: reportId,
+        sender_id: user.id,
+        body: `Hi, I found your ${item.title}!`,
+      })
+    }
   }
 
-  return (
-    <NotifyOwnerCard
-      itemId={item.id}
-      itemTitle={item.title}
-      ownerName={owner?.full_name || 'the owner'}
-      existingReportId={existingReport?.id ?? null}
-    />
-  )
+  if (!reportId) {
+    redirect(`/item/${qrId}`)
+  }
+
+  redirect(`/dashboard/messages/${reportId}?justConnected=1`)
 }

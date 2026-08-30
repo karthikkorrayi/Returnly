@@ -150,15 +150,18 @@ export default function ChatThread({
 
           {resolved ? (
             <p className="rounded-2xl bg-[var(--color-success-reunited-soft)] p-4 text-sm font-bold text-[#435f3d]">
-              This item was marked recovered. The conversation has been closed and cleared.
+              Marked as received. The conversation has been closed and cleared.
             </p>
           ) : status === 'requested' && isOwner ? (
-            <div className="rounded-2xl border border-[var(--color-primary-trust)]/30 bg-[var(--color-primary-trust)]/8 p-5 text-center">
-              <p className="font-black text-[var(--color-ink)]">{otherPartyName} wants to chat about {itemTitle}.</p>
-              <p className="mt-1 text-sm text-[var(--color-ink-muted)]">Accept to start messaging directly.</p>
+            <div className="rounded-2xl border border-[var(--color-primary-trust)]/30 bg-[var(--color-primary-trust)]/8 p-5">
+              <p className="font-black text-[var(--color-ink)]">{otherPartyName} may have found {itemTitle}.</p>
+              {messages[0] && (
+                <p className="mt-3 rounded-xl bg-white/80 p-3 text-sm text-[var(--color-ink)]">"{messages[0].body}"</p>
+              )}
+              <p className="mt-3 text-sm text-[var(--color-ink-muted)]">Accept to reply and continue the conversation.</p>
               {error && <p className="mt-3 text-sm font-bold text-[#7a3d0b]">{error}</p>}
               <button type="button" onClick={acceptChat} disabled={accepting} className="btn-primary mt-4 px-6 py-3">
-                {accepting ? 'Accepting…' : 'Accept and chat'}
+                {accepting ? 'Accepting…' : 'Accept and reply'}
               </button>
             </div>
           ) : status === 'requested' && !isOwner ? (
