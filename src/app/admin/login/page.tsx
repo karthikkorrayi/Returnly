@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -15,29 +14,17 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const supabase = createClient()
 
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
+    const response = await fetch('/api/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
     })
 
-    if (signInError) {
-      setLoading(false)
-      setError(signInError.message)
-      return
-    }
-
-    // A clear message here beats a silent 404 right after a
-    // successful login — the layout's notFound() is still the real
-    // enforcement, this is just better feedback for a real admin
-    // who mistyped which account they meant to use
-    const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', data.user.id).single()
     setLoading(false)
 
-    if (!profile?.is_admin) {
-      setError('This account does not have admin access.')
-      await supabase.auth.signOut()
+    if (!response.ok) {
+      setError('Invalid credentials.')
       return
     }
 
@@ -50,7 +37,6 @@ export default function AdminLoginPage() {
       <form onSubmit={handleLogin} className="w-full max-w-sm rounded-[1.35rem] border border-white/10 bg-[#242832] p-6 shadow-2xl sm:p-7">
         <p className="font-utility text-xs font-bold uppercase text-white/50">Returnly</p>
         <h1 className="font-display mt-1 text-3xl font-semibold text-white">Admin sign in</h1>
-        <p className="mt-2 text-sm text-white/60">Restricted access. Use your admin account credentials.</p>
 
         {error && (
           <p className="mt-4 rounded-xl border border-orange-500/30 bg-orange-500/10 p-3 text-sm font-medium text-orange-300" role="alert">
@@ -60,12 +46,12 @@ export default function AdminLoginPage() {
 
         <div className="mt-5 space-y-4">
           <div>
-            <label className="block text-sm font-bold text-white/80">Email</label>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/30" autoComplete="email" />
+            <label className="block text-sm font-bold text-white/80">Username</label>
+            <input value={username} onChange={(e) => setUsername(e.target.value)} required className="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/30" />
           </div>
           <div>
             <label className="block text-sm font-bold text-white/80">Password</label>
-            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/30" autoComplete="current-password" />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/30" />
           </div>
         </div>
 

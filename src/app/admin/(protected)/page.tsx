@@ -1,8 +1,8 @@
 import AdminOrderRow from './AdminOrderRow'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export default async function AdminPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: orders } = await supabase
     .from('qr_fulfillment_orders')
@@ -13,7 +13,7 @@ export default async function AdminPage() {
   const userIds = [...new Set((orders ?? []).map((o) => o.user_id))]
 
   const { data: items } = itemIds.length
-    ? await supabase.from('items_public').select('id,title').in('id', itemIds)
+    ? await supabase.from('items').select('id,title').in('id', itemIds)
     : { data: [] }
 
   const { data: profiles } = userIds.length

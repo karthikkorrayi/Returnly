@@ -38,15 +38,18 @@ export default function AdminOrderRow({
   async function handleStatusChange(newStatus: string) {
     setSaving(true)
     setError(null)
-    const supabase = createClient()
-    const { error: updateError } = await supabase
-      .from('qr_fulfillment_orders')
-      .update({ status: newStatus })
-      .eq('id', orderId)
+
+    const response = await fetch('/api/admin-update-order-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, status: newStatus }),
+    })
+
     setSaving(false)
 
-    if (updateError) {
-      setError(updateError.message)
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}))
+      setError(body.error ?? 'Update failed.')
       return
     }
     setCurrentStatus(newStatus)
