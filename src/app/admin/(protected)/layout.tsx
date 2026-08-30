@@ -8,13 +8,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/admin/login')
   }
 
   const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
 
-  // notFound() rather than a "you're not authorized" message — this
-  // avoids confirming to a non-admin that an admin area even exists
+  // A logged-in but non-admin user still gets a 404, not "access
+  // denied" — no reason to confirm to a regular user that this area
+  // exists just because they happened to guess the URL
   if (!profile?.is_admin) {
     notFound()
   }
