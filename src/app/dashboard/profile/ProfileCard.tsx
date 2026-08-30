@@ -7,6 +7,9 @@ type Profile = {
   full_name: string | null
   phone_number: string | null
   address: string | null
+  city: string
+  country: string
+  state_region: string
   reputation_score: number | null
 }
 
@@ -15,6 +18,9 @@ export default function ProfileCard({ userId, email, profile }: { userId: string
   const [fullName, setFullName] = useState(profile.full_name ?? '')
   const [phoneNumber, setPhoneNumber] = useState(profile.phone_number ?? '')
   const [address, setAddress] = useState(profile.address ?? '')
+  const [city, setCity] = useState(profile.city ?? '')
+  const [stateRegion, setStateRegion] = useState(profile.state_region ?? '')
+  const [country, setCountry] = useState(profile.country ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -62,6 +68,9 @@ export default function ProfileCard({ userId, email, profile }: { userId: string
               <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name" className="input-field" required />
               <input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} type="tel" placeholder="Phone number" className="input-field" required />
               <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Address" rows={2} className="input-field" required />
+              <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" className="input-field" />
+              <input value={stateRegion} onChange={(e) => setStateRegion(e.target.value)} placeholder="State" className="input-field" />
+              <input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country" className="input-field" />
               {error && <p className="text-sm font-bold text-[#7a3d0b]">{error}</p>}
               <div className="flex gap-2">
                 <button type="submit" disabled={saving} className="btn-primary px-4 py-2 text-sm">{saving ? 'Saving…' : 'Save'}</button>

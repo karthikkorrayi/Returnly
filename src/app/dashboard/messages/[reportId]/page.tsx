@@ -42,6 +42,14 @@ export default async function MessagesPage({
   const isOwner = item?.user_id === user.id
   const isFinder = report.finder_id === user.id
 
+  const { data: finderProfile } = isOwner && report.finder_id
+  ? await supabase
+      .from('profiles_public')
+      .select('full_name,city,state,country,reputation_score,has_finder_badge')
+      .eq('id', report.finder_id)
+      .single()
+  : { data: null }
+
   if (!isOwner && !isFinder) {
     notFound()
   }

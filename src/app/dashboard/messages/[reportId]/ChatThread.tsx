@@ -106,20 +106,23 @@ export default function ChatThread({
 
     const { data: reportRow } = await supabase.from('found_reports').select('item_id').eq('id', reportId).single()
 
-    const { error: deleteError } = await supabase.from('messages').delete().eq('report_id', reportId)
-    const { error: reportError } = await supabase.from('found_reports').update({ status: 'resolved' }).eq('id', reportId)
+    // No longer deletes messages immediately — resolved_at starts the
+    // retention clock, and a scheduled cleanup job removes them later
+    const { error: reportError } = await supabase
+      .from('found_reports')
+      .update({ status: 'resolved', resolved_at: new Date().toISOString() })
+      .eq('id', reportId)
     const { error: itemError } = reportRow
       ? await supabase.from('items').update({ is_lost: false }).eq('id', reportRow.item_id)
       : { error: null }
 
     setResolving(false)
 
-    if (deleteError || reportError || itemError) {
-      setError(deleteError?.message ?? reportError?.message ?? itemError?.message ?? 'Could not complete this action.')
+    if (reportError || itemError) {
+      setError(reportError?.message ?? itemError?.message ?? 'Could not complete this action.')
       return
     }
 
-    setMessages([])
     setResolved(true)
   }
 
@@ -150,7 +153,7 @@ export default function ChatThread({
 
           {resolved ? (
             <p className="rounded-2xl bg-[var(--color-success-reunited-soft)] p-4 text-sm font-bold text-[#435f3d]">
-              Marked as received. The conversation has been closed and cleared.
+              Marked as received. This conversation will be automatically cleared in a few days.
             </p>
           ) : status === 'requested' && isOwner ? (
             <div className="rounded-2xl border border-[var(--color-primary-trust)]/30 bg-[var(--color-primary-trust)]/8 p-5">
